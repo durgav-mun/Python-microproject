@@ -1,0 +1,79 @@
+# Flowchart: Jet Nozzle Flow System - Data Processing Pipeline
+#
+#                          START
+#                            │
+#                    ┌───────▼────────┐
+#                    │  Arduino Reads  │
+#                    │  Sensor Inputs  │
+#                    └───────┬────────┘
+#                            │
+#          ┌─────────────────┼─────────────────┐
+#          │                 │                 │
+#     ┌────▼────┐    ┌──────▼──────┐   ┌──────▼──────┐
+#     │Pressure │    │Temperature  │   │Flow Rate &  │
+#     │Sensor   │    │Sensor       │   │Velocity    │
+#     │(Analog) │    │(Analog)     │   │(Digital)   │
+#     └────┬────┘    └──────┬──────┘   └──────┬──────┘
+#          │                │                 │
+#          └────────────────┼─────────────────┘
+#                           │
+#                    ┌──────▼─────────┐
+#                    │  Serial Output │
+#                    │  9600 Baud     │
+#                    └──────┬─────────┘
+#                           │
+#                    ┌──────▼──────────────────┐
+#                    │ Python Bridge           │
+#                    │ serial_to_mysql.py      │
+#                    └──────┬──────────────────┘
+#                           │
+#                    ┌──────▼──────────────────┐
+#                    │  Parse Sensor Data      │
+#                    │  Extract: P, T, FR, V   │
+#                    └──────┬──────────────────┘
+#                           │
+#                           ├─ Valid?
+#                           │
+#        ┌──────────────────┼──────────────────┐
+#        │ YES              │ NO               │
+#        ├──────────────────┤                  │
+#    ┌───▼──────────┐       │            ┌─────▼─────────┐
+#    │Insert into   │       │            │Log Error      │
+#    │flow_data     │       │            │Continue       │
+#    │table         │       │            └───────────────┘
+#    └───┬──────────┘       │
+#        │                  │
+#    ┌───▼────────────────────────────┐
+#    │ Calculate Velocity Vectors     │
+#    │ Using: velocity magnitude &    │
+#    │        nozzle angle            │
+#    └───┬────────────────────────────┘
+#        │
+#    ┌───▼────────────────────────────┐
+#    │ Insert into vector_analysis    │
+#    │ Store: Vx, Vy, Vz, magnitude   │
+#    └───┬────────────────────────────┘
+#        │
+#    ┌───▼────────────────────────────┐
+#    │ Trigger Backend API            │
+#    │ Notify: New data available     │
+#    └───┬────────────────────────────┘
+#        │
+#    ┌───▼────────────────────────────┐
+#    │ Frontend Polling               │
+#    │ Fetch latest data              │
+#    └───┬────────────────────────────┘
+#        │
+#    ┌───▼────────────────────────────┐
+#    │ Update Visualizations          │
+#    │ - Real-time charts             │
+#    │ - Sensor gauges                │
+#    │ - Vector plots                 │
+#    └───┬────────────────────────────┘
+#        │
+#    ┌───▼────────────────────────────┐
+#    │ Display to User                │
+#    │ Dashboard ready for analysis   │
+#    └────────────────────────────────┘
+
+[See flowchart.png for visual representation]

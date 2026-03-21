@@ -1,0 +1,23 @@
+# Python Requirements for Jet Nozzle Flow System
+
+# Serial Communication
+pyserial==3.5
+
+# Database
+mysql-connector-python==8.0.32
+
+# Environment Configuration
+python-dotenv==1.0.0
+
+# Utilities
+requests==2.31.0
+numpy==1.24.3
+
+# Optional: Data Analysis
+pandas==2.0.2
+matplotlib==3.7.1
+
+# Development
+pytest==7.3.1
+black==23.3.0
+pylint==2.17.4

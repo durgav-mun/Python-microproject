@@ -1,0 +1,24 @@
+# Circuit Diagram: Jet Nozzle Flow System - Arduino Sensor Interface
+# This is a text placeholder for the circuit diagram
+# The actual schematic should be created in:
+# - Fritzing (open-source, visual)
+# - KiCAD (professional PCB design)
+# - LTspice (circuit simulation)
+
+# Signal Flow:
+# Pressure Sensor → Analog Signal → Arduino A0
+# Temperature Sensor → Analog Signal → Arduino A1
+# Flow Rate Sensor → Digital Pulse (5kHz max) → Arduino D2 (INT0)
+# Velocity Sensor → Digital Pulse (5kHz max) → Arduino D3 (INT1)
+# Power: 5V from Arduino to all sensors
+# Ground: Common ground for all components
+
+# Connection Details:
+# Sensor VCC → Arduino 5V
+# Sensor GND → Arduino GND
+# Sensor OUT → Corresponding Arduino Pin (A0, A1, D2, D3)
+
+# Add 0.1µF bypass capacitors near sensor inputs
+# Add 10kΩ pull-up resistors on digital inputs (D2, D3)
+
+[See hardware_setup.md for detailed wiring instructions]
