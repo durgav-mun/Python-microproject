@@ -1,7 +1,9 @@
 # PYTHON - MICROPROJECT
+---
 # PROJECT OVERVIEW
+---
 ## FLUID SIMULATOR
-
+---
 This is a web app I built that simulates fluid flow through a pipe using Bernoulli's equation. You enter some values like velocity and pressure, and it calculates what happens at the outlet and tells you if the system is safe or not.
 
 ---
