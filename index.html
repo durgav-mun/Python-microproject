@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Options - Fluid Simulation</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="auth-container" style="max-width: 750px; text-align: left;">
+        <div class="auth-header" style="text-align: center;">
+            <h1>Fluid Simulation Setup</h1>
+            <p>Welcome, <span id="user-display">Explorer</span>!</p>
+        </div>
+        
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-main); font-weight: 600; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Simulation Parameters</h3>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0 1.5rem;">
+            <div class="input-group">
+                <label>Inlet Velocity (m/s)</label>
+                <input type="number" id="inlet-velocity" value="1.0" step="0.1">
+            </div>
+            <div class="input-group">
+                <label>Pressure (Pa)</label>
+                <input type="number" id="pressure" value="101325" step="100">
+            </div>
+            <div class="input-group">
+                <label>Inlet Radius (m)</label>
+                <input type="number" id="inlet-radius" value="0.5" step="0.05">
+            </div>
+            <div class="input-group">
+                <label>Outlet Radius (m)</label>
+                <input type="number" id="outlet-radius" value="0.2" step="0.05">
+            </div>
+            <div class="input-group">
+                <label>Fluid Density (kg/m³)</label>
+                <input type="number" id="fluid-density" value="1000" step="10">
+            </div>
+        </div>
+        
+        <div id="btn-group-main" style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+            <button class="btn" onclick="submitSimulation()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Generate Results Report
+            </button>
+            <button class="btn" onclick="window.location.href='history.html'" style="background: rgba(255, 255, 255, 0.1); width: auto; padding: 0.9rem 1.5rem;">
+                View History
+            </button>
+            <button class="btn" onclick="logout()" style="background: rgba(255, 255, 255, 0.1); width: auto; padding: 0.9rem 1.5rem;">
+                Logout
+            </button>
+        </div>
+    </div>
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('user-display').textContent = user.username;
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    </script>
+    <script src="js/simulation.js"></script>
+</body>
+</html>
