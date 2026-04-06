@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation History - Fluid Simulation</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            color: var(--text-main);
+        }
+        .history-table th, .history-table td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        .history-table th {
+            color: var(--text-dim);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.02);
+            position: sticky;
+            top: 0;
+        }
+        .history-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-dim);
+        }
+        .history-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(10px);
+        }
+        /* Scrollbar styling */
+        .history-container::-webkit-scrollbar { width: 8px; }
+        .history-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 0 8px 8px 0; }
+        .history-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        .history-container::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+    </style>
+</head>
+<body>
+    <div class="auth-container" style="max-width: 900px; text-align: left;">
+        <div class="auth-header" style="text-align: center;">
+            <h1>Simulation History</h1>
+            <p>Past simulation records for <span id="user-display">User</span></p>
+        </div>
+        
+        <div class="history-container">
+            <table class="history-table" id="history-table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Inlet Velocity</th>
+                        <th>Fluids Pressure</th>
+                        <th>Safety Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <!-- Data populated by JS -->
+                </tbody>
+            </table>
+            <div id="loading" class="empty-state">Loading history...</div>
+            <div id="empty-state" class="empty-state" style="display: none;">No simulation history found.</div>
+        </div>
+        
+        <div id="btn-group-main" style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
+            <button class="btn" onclick="window.location.href='index.html'" style="background: rgba(255, 255, 255, 0.1); width: auto; padding: 0.9rem 1.5rem;">
+                ← Back to Setup
+            </button>
+            <button class="btn" onclick="logout()" style="background: rgba(255, 255, 255, 0.1); width: auto; padding: 0.9rem 1.5rem;">
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('user-display').textContent = user.username;
+            fetchHistory();
+        }
+
+        function logout() {
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+
+        function getSafetyBadge(status) {
+            if (status.includes("UNSAFE")) {
+                return `<span class="status-badge" style="background: rgba(239, 68, 68, 0.15); color: #ef4444;">${status}</span>`;
+            } else if (status.includes("WARNING")) {
+                return `<span class="status-badge" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">${status}</span>`;
+            }
+            return `<span class="status-badge" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">${status}</span>`;
+        }
+
+        function viewSimulation(simString) {
+            const sim = JSON.parse(decodeURIComponent(simString));
+            const paramsString = JSON.stringify(sim.params);
+            
+            localStorage.setItem('simulationParams', paramsString);
+            
+            // Prevent results.html from saving this again as a new simulation
+            sessionStorage.setItem('lastSavedSimulation', paramsString);
+            
+            window.location.href = 'results.html';
+        }
+
+        function fetchHistory() {
+            fetch(`http://localhost:5000/api/simulations/${user.id}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none';
+                    if (!data.simulations || data.simulations.length === 0) {
+                        document.getElementById('empty-state').style.display = 'block';
+                        document.getElementById('history-table').style.display = 'none';
+                        return;
+                    }
+                    
+                    const tbody = document.getElementById('history-body');
+                    data.simulations.forEach(sim => {
+                        const tr = document.createElement('tr');
+                        const date = new Date(sim.timestamp).toLocaleString();
+                        const pVelocity = sim.params.inletVelocity + " m/s";
+                        const pPressure = sim.params.pressure + " Pa";
+                        const safeBadge = getSafetyBadge(sim.results.safetyStatus);
+                        
+                        const encodedSim = encodeURIComponent(JSON.stringify(sim));
+
+                        tr.innerHTML = `
+                            <td>${date}</td>
+                            <td>${pVelocity}</td>
+                            <td>${pPressure}</td>
+                            <td>${safeBadge}</td>
+                            <td>
+                                <button onclick="viewSimulation('${encodedSim}')" style="background: transparent; border: 1px solid var(--border); color: var(--text-main); padding: 0.4rem 0.8rem; border-radius: 4px; cursor: pointer;">
+                                    View
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => {
+                    console.error("Failed to load history", err);
+                    document.getElementById('loading').innerText = "Failed to load history. Is the server running?";
+                });
+        }
+    </script>
+</body>
+</html>

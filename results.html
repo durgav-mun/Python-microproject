@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Fluid Simulation</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body style="padding: 2rem 0; min-height: 100vh; display: block; overflow-y: auto;">
+    <div class="auth-container" id="results-dashboard" style="max-width: 900px; margin: 0 auto; text-align: left;">
+        <div class="auth-header" style="text-align: center;">
+            <h1 style="font-size: 2.2rem; margin-bottom: 0.8rem;">Fluid Dynamics Analysis</h1>
+            <p style="font-size: 1rem;">Simulation Predictions and Reporting</p>
+        </div>
+
+        <!-- Input Parameters Section -->
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-main); font-weight: 600; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Input Boundary Conditions</h3>
+        <div style="margin-bottom: 2.5rem; background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 0.75rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; font-size: 0.95rem; color: var(--text-main);">
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Inlet Velocity (V₁)</span> <strong id="in-v1">-</strong> m/s</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Inlet Pressure (P₁)</span> <strong id="in-p1">-</strong> Pa</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Inlet Radius (r₁)</span> <strong id="in-r1">-</strong> m</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Outlet Radius (r₂)</span> <strong id="in-r2">-</strong> m</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Fluid Density (ρ)</span> <strong id="in-rho">-</strong> kg/m³</div>
+            </div>
+        </div>
+
+        <!-- Flow Animation Canvas -->
+        <h3 style="margin-bottom: 1rem; color: var(--text-main); font-weight: 600; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Live Flow Visualization</h3>
+        <div style="margin-bottom: 2rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border); border-radius: 0.75rem; overflow: hidden; position: relative; height: 180px; box-shadow: inset 0 4px 6px rgba(0,0,0,0.3);">
+            <canvas id="flowCanvas" style="width: 100%; height: 100%; display: block;"></canvas>
+            <div id="animation-overlay" style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); color: var(--text-muted); font-size: 0.95rem; font-weight: 500;">
+                Rendering...
+            </div>
+        </div>
+        
+        <!-- Predict & Results Section -->
+        <h3 style="margin-bottom: 1.5rem; color: var(--text-main); font-weight: 600; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Physics Evaluation Matrix</h3>
+        <div id="results-panel" style="background: rgba(16, 185, 129, 0.03); border: 1px solid rgba(16, 185, 129, 0.15); padding: 1.5rem; border-radius: 0.75rem; animation: fadeIn 0.4s ease-out;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; font-size: 0.98rem; color: var(--text-main);">
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Inlet Area</span> <strong id="res-inlet-area">-</strong> m²</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Outlet Area</span> <strong id="res-outlet-area">-</strong> m²</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Flow Rate (Q)</span> <strong id="res-flow-rate">-</strong> m³/s</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Outlet Velocity</span> <strong id="res-outlet-velocity">-</strong> m/s</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Outlet Pressure (P₂)</span> <strong id="res-outlet-pressure">-</strong> Pa</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Bernoulli Constant</span> <strong id="res-bernoulli">-</strong> J/m³</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Pressure Gradient (∇P)</span> <strong id="res-gradient">-</strong> Pa/m</div>
+                <div><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Divergence (∇·V)</span> <strong id="res-divergence">-</strong> s⁻¹</div>
+                <div style="grid-column: span 2;"><span style="color: var(--text-muted); font-size: 0.85rem; display: block;">Velocity Vectors</span> <strong id="res-vectors">-</strong></div>
+                <div style="grid-column: span 2; margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid rgba(16, 185, 129, 0.2);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">Flow Behavior Classification</span> 
+                        <strong id="res-behavior" style="color: #6ee7b7; font-size: 0.95rem;">-</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">Efficiency (V₂ / V₁)</span> 
+                        <strong id="res-efficiency" style="color: var(--text-main); font-size: 0.95rem;">-</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                        <span style="color: var(--text-muted); font-size: 0.85rem;">Engine Safety Evaluation</span> 
+                        <strong id="res-safety" style="padding: 0.3rem 0.6rem; border-radius: 0.5rem; font-size: 0.85rem; background: rgba(255,255,255,0.1);">-</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <span style="color: var(--text-muted); font-size: 0.85rem; width: 30%;">Explanation</span> 
+                        <span id="res-explanation" style="color: var(--text-main); font-size: 0.85rem; text-align: right; width: 70%; line-height: 1.4;">-</span>
+                    </div>
+                    <div id="rec-container" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <span style="color: var(--text-muted); font-size: 0.85rem; width: 30%;">Recommendation</span> 
+                        <span id="res-recommendation" style="color: #60a5fa; font-size: 0.85rem; text-align: right; width: 70%; font-weight: 500; line-height: 1.4;">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <h3 style="margin-top: 2.5rem; margin-bottom: 1.5rem; color: var(--text-main); font-weight: 600; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;">Visual Data Flow</h3>
+        <div id="charts-panel" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div style="background: rgba(30, 41, 59, 0.5); padding: 1rem; border-radius: 0.75rem; border: 1px solid var(--border);">
+                <canvas id="velocityChart"></canvas>
+            </div>
+            <div style="background: rgba(30, 41, 59, 0.5); padding: 1rem; border-radius: 0.75rem; border: 1px solid var(--border);">
+                <canvas id="pressureChart"></canvas>
+            </div>
+        </div>
+        
+        <div id="btn-group-main" style="margin-top: 2.5rem; display: flex; gap: 1rem; justify-content: center;">
+            <button class="btn" onclick="window.location.href='index.html'" style="background: rgba(255, 255, 255, 0.1);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 8 8 12 12 16"></polyline><line x1="16" y1="12" x2="8" y2="12"></line></svg>
+                Back to Setup
+            </button>
+            <button class="btn" onclick="window.location.href='history.html'" style="background: rgba(255, 255, 255, 0.1);">
+                View History
+            </button>
+            <button class="btn" onclick="downloadReport()" style="background: var(--primary);">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Export PDF Report
+            </button>
+        </div>
+    </div>
+    <script src="js/simulation.js"></script>
+    <script>
+        window.onload = () => {
+            renderResults();
+        };
+    </script>
+</body>
+</html>
