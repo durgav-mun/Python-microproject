@@ -1,7 +1,8 @@
-#PYTHON - MICROPROJECT
-# Fluid Simulation Project
+# PYTHON - MICROPROJECT
+# PROJECT OVERVIEW
+## FLUID SIMULATOR
 
-This is a web app we built that simulates fluid flow through a pipe using Bernoulli's equation. You enter some values like velocity and pressure, and it calculates what happens at the outlet and tells you if the system is safe or not.
+This is a web app I built that simulates fluid flow through a pipe using Bernoulli's equation. You enter some values like velocity and pressure, and it calculates what happens at the outlet and tells you if the system is safe or not.
 
 ---
 
@@ -24,6 +25,36 @@ This is a web app we built that simulates fluid flow through a pipe using Bernou
 - **Database** - MongoDB Atlas
 - **Charts** - Chart.js
 - **PDF export** - jsPDF + html2canvas
+
+---
+
+## FILE STRUCTURE
+
+```
+project/
+│
+backend/
+├── routes/
+│   ├── auth_routes.py
+│   └── simulation_routes.py
+├── models/
+│   ├── user_model.py
+│   └── simulation_model.py
+└── app.py
+    db.py
+    requirements.txt
+    .env
+└── frontend/
+    ├── login.html      # login page
+    ├── register.html   # sign up page
+    ├── index.html      # input form page
+    ├── results.html    # shows the results and charts
+    ├── history.html    # shows past simulations
+    ├── css/style.css   # styling for all pages
+    └── js/
+        ├── auth.js        # login/register calls
+        └── simulation.js  # submits simulation, renders results, exports PDF
+```
 
 ---
 
@@ -148,7 +179,7 @@ The app checks the computed values against safe operating thresholds and classif
 
 ---
 
-## NOTE
+## NOTES
 
 - Don't commit your `.env` file — it has your database credentials in it
 - The history page won't create a duplicate when you view an old simulation
